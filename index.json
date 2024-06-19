@@ -1,5 +1,25 @@
 [
   {
+    "name": "Aniyomi: Debrid Index",
+    "pkg": "eu.kanade.tachiyomi.animeextension.all.debridindex",
+    "apk": "aniyomi-all.debridindex-v14.1.apk",
+    "lang": "all",
+    "code": 1,
+    "version": "14.1",
+    "nsfw": 0,
+    "hasReadme": 0,
+    "hasChangelog": 0,
+    "sources": [
+      {
+        "name": "Debrid Index",
+        "lang": "all",
+        "id": "824133852049869443",
+        "baseUrl": "https://torrentio.strem.fun",
+        "versionId": 1
+      }
+    ]
+  },
+  {
     "name": "Aniyomi: Google Drive",
     "pkg": "eu.kanade.tachiyomi.animeextension.all.googledrive",
     "apk": "aniyomi-all.googledrive-v14.15.apk",
