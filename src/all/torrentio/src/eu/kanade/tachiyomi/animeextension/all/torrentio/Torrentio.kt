@@ -854,7 +854,7 @@ class Torrentio : ConfigurableAnimeSource, AnimeHttpSource() {
         private val PREF_LANG_DEFAULT = setOf<String>()
 
         private const val UPCOMING_EP_KEY = "upcoming_ep"
-        private const val UPCOMING_EP_DEFAULT = true
+        private const val UPCOMING_EP_DEFAULT = false
 
         private const val IS_DUB_KEY = "dubbed"
         private const val IS_DUB_DEFAULT = false
