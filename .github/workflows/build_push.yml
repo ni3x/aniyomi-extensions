@@ -152,7 +152,7 @@ jobs:
       - name: Checkout repo branch
         uses: actions/checkout@v4
         with:
-          repository: ni3x/aniyomi-extensions
+          repository: ni3x/aniyomi-extensions-repo
           token: ${{ secrets.GITHUB_TOKEN }}
           ref: repo
           path: repo
