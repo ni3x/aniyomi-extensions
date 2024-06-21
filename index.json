@@ -299,5 +299,25 @@
         "versionId": 1
       }
     ]
+  },
+  {
+    "name": "Aniyomi: Subsplease (Torrent)",
+    "pkg": "eu.kanade.tachiyomi.animeextension.en.subsplease",
+    "apk": "aniyomi-en.subsplease-v14.1.apk",
+    "lang": "en",
+    "code": 1,
+    "version": "14.1",
+    "nsfw": 0,
+    "hasReadme": 0,
+    "hasChangelog": 0,
+    "sources": [
+      {
+        "name": "Subsplease (Torrent)",
+        "lang": "en",
+        "id": "7607095627337529559",
+        "baseUrl": "https://subsplease.org",
+        "versionId": 1
+      }
+    ]
   }
 ]
