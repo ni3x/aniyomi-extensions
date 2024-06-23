@@ -74,7 +74,7 @@ jobs:
             core.setOutput('individualMatrix', { 'chunk': [...Array(numIndividualChunks).keys()] });
 
   build_individual:
-    name: Build individual modules
+    name: Build individual modules a
     needs: prepare
     runs-on: ubuntu-latest
     strategy:

@@ -21,7 +21,7 @@ Source requests here are meant as up-for-grabs for any developer, thus it's impo
 
 # Contributing
 
-Contributions are welcome!!
+Contributions are welcome!
 
 Check out the repo's [issue backlog](https://github.com/aniyomiorg/aniyomi-extensions/issues) for source requests and bug reports.
 
