@@ -11,9 +11,9 @@ This repository contains the available extension catalogues for the [Aniyomi](ht
 
 Extension sources can be downloaded, installed, and uninstalled via the main Aniyomi app. They are installed and uninstalled like regular apps, in `.apk` format.
 
-## Downloads
+## Downloads and Installation
 
-If you prefer to directly download the APK files, they are available via https://aniyomi.org/extensions/ or directly in this GitHub repository in the [`repo` branch](https://github.com/aniyomiorg/aniyomi-extensions/tree/repo/apk).
+If you prefer to directly add repository, they are available via [`Install`](aniyomi://add-repo?url=https://raw.githubusercontent.com/ni3x/aniyomi-extensions/repo/index.min.json) or directly in this GitHub repository in the [`repo` branch](https://github.com/ni3x/aniyomi-extensions/tree/repo/apk).
 
 # Requests
 
