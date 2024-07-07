@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: master
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ANIYOMIORG_BOT_PAT }}
 
       - name: Find lib changes
         id: modified-libs
@@ -154,7 +154,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ni3x/aniyomi-extensions
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ANIYOMIORG_BOT_PAT }}
           ref: repo
           path: repo
 
