@@ -161,7 +161,7 @@ jobs:
           path: repo
 
       - name: Grant execute permission for commit-repo.sh
-        run: chmod +x ./.github/scripts/commit-repo.sh
+        run: chmod +x .github/scripts/commit-repo.sh
 
       - name: Import GPG key
         uses: crazy-max/ghaction-import-gpg@v6.1.0
