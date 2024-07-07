@@ -13,7 +13,7 @@ Extension sources can be downloaded, installed, and uninstalled via the main Ani
 
 ## Downloads and Installation
 
-If you prefer to directly add repository, they are available via [`Install`](aniyomi://add-repo?url=https://raw.githubusercontent.com/ni3x/aniyomi-extensions/repo/index.min.json) or directly in this GitHub repository in the [`repo` branch](https://github.com/ni3x/aniyomi-extensions/tree/repo/apk).
+If you prefer to directly add repository, they are available via [Install](aniyomi://add-repo?url=https://raw.githubusercontent.com/ni3x/aniyomi-extensions/repo/index.min.json) or directly in this GitHub repository in the [`repo` branch](https://github.com/ni3x/aniyomi-extensions/tree/repo/apk).
 
 # Requests
 
