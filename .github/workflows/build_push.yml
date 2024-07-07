@@ -98,6 +98,9 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
       - name: Build extensions (chunk ${{ matrix.chunk }})
         env:
           CI_CHUNK_NUM: ${{ matrix.chunk }}
