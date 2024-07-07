@@ -170,4 +170,4 @@ jobs:
       - name: Deploy repo
         run: |
           cd repo
-          ../master/.github/scripts/commit-repo.sh
+          chmod +x ./gradlew && ../master/.github/scripts/commit-repo.sh
