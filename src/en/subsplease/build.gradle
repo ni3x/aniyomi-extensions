@@ -1,0 +1,8 @@
+ext {
+    extName = 'Subsplease (Torrent)'
+    extClass = '.Subsplease'
+    extVersionCode = 1
+    isTorrent = true
+}
+
+apply from: "$rootDir/common.gradle"
