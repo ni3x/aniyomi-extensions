@@ -48,7 +48,6 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-        # This step is going to commit, but this will not trigger another workflow.
       - name: Bump extensions that uses a modified lib
         if: steps.modified-libs.outputs.any_changed == 'true'
         run: |
@@ -61,7 +60,6 @@ jobs:
         run: |
           set -x
           projects=(src/*/*)
-
           echo "NUM_INDIVIDUAL_MODULES=${#projects[@]}" >> $GITHUB_ENV
 
       - id: generate-matrices
@@ -71,11 +69,8 @@ jobs:
           script: |
             const numIndividualModules = process.env.NUM_INDIVIDUAL_MODULES;
             const chunkSize = process.env.CI_CHUNK_SIZE;
-
             const numIndividualChunks = Math.ceil(numIndividualModules / chunkSize);
-
             console.log(`Individual modules: ${numIndividualModules} (${numIndividualChunks} chunks of ${chunkSize})`);
-
             core.setOutput('individualMatrix', { 'chunk': [...Array(numIndividualChunks).keys()] });
 
   build_individual:
