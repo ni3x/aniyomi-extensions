@@ -27,6 +27,8 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 
 class OppaiStream : ParsedAnimeHttpSource(), ConfigurableAnimeSource {
 
@@ -120,8 +122,10 @@ class OppaiStream : ParsedAnimeHttpSource(), ConfigurableAnimeSource {
     override fun searchAnimeFromElement(element: Element) = SAnime.create().apply {
         thumbnail_url = element.selectFirst("img.cover-img-in")?.attr("abs:src")
         title = element.selectFirst(".title-ep")!!.text().replace(TITLE_CLEANUP_REGEX, "")
+        val encodedUrl = element.attr("href").substringAfter("to=")
+        val decodedUrl = URLDecoder.decode(encodedUrl, StandardCharsets.UTF_8.toString())
         setUrlWithoutDomain(
-            element.attr("href").replace(Regex("(?<=\\?e=)(.*?)(?=&f=)")) {
+            decodedUrl.replace(Regex("(?<=\\?e=)(.*?)(?=&f=)")) {
                 java.net.URLEncoder.encode(it.groupValues[1], "UTF-8")
             },
         )
@@ -179,14 +183,16 @@ class OppaiStream : ParsedAnimeHttpSource(), ConfigurableAnimeSource {
     override fun episodeListSelector() = "div.more-same-eps > div > div > a"
 
     override fun episodeFromElement(element: Element) = SEpisode.create().apply {
+        val encodedUrl = element.attr("href").substringAfter("to=")
+        val decodedUrl = URLDecoder.decode(encodedUrl, StandardCharsets.UTF_8.toString())
         setUrlWithoutDomain(
-            element.attr("href").replace(Regex("(?<=\\?e=)(.*?)(?=&f=)")) {
+            decodedUrl.replace(Regex("(?<=\\?e=)(.*?)(?=&f=)")) {
                 java.net.URLEncoder.encode(it.groupValues[1], "UTF-8")
             },
         )
         val num = element.selectFirst("font.ep")?.text() ?: "1"
         name = "Episode $num"
-        episode_number = (num.toFloatOrNull() ?: 1F) - 1
+        episode_number = "0.$num".toFloat()
         scanlator = element.selectFirst("h6 > a")?.text()
     }
 
