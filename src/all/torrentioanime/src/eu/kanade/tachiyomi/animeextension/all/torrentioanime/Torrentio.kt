@@ -10,6 +10,7 @@ import androidx.preference.ListPreference
 import androidx.preference.MultiSelectListPreference
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
+import eu.kanade.tachiyomi.animeextension.all.torrentioanime.dto.AnilistMapping
 import eu.kanade.tachiyomi.animeextension.all.torrentioanime.dto.AnilistMeta
 import eu.kanade.tachiyomi.animeextension.all.torrentioanime.dto.AnilistMetaLatest
 import eu.kanade.tachiyomi.animeextension.all.torrentioanime.dto.DetailsById
@@ -299,8 +300,25 @@ class Torrentio : ConfigurableAnimeSource, AnimeHttpSource() {
     }
 
     // ============================== Episodes ==============================
+
+    private fun anilistMappingRequest(): Request {
+        return GET("https://raw.githubusercontent.com/Fribb/anime-lists/master/anime-offline-database-reduced.json")
+    }
+
+    private fun anilistMappingParse(): List<AnilistMapping> {
+        val response = client.newCall(anilistMappingRequest()).execute()
+        val responseString = response.body.string()
+        return json.decodeFromString(responseString)
+    }
+
+    private fun anilistToKitsuMapping(anilistId: String): String {
+        val anilistMapping = anilistMappingParse()
+        return anilistMapping.find { anilistId == it.anilistId.toString() }?.kitsuId.toString()
+    }
+
     override fun episodeListRequest(anime: SAnime): Request {
-        return GET("https://anime-kitsu.strem.fun/meta/series/anilist%3A${anime.url}.json")
+        val kitsuId = anilistToKitsuMapping(anime.url)
+        return GET("https://anime-kitsu.strem.fun/meta/series/kitsu%3A$kitsuId.json")
     }
 
     override fun episodeListParse(response: Response): List<SEpisode> {
