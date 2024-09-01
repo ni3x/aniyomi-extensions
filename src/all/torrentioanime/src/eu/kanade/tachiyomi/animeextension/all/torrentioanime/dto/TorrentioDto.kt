@@ -162,6 +162,6 @@ data class AnilistMapping(
     @SerialName("anilist_id")
     val anilistId: Int? = null,
 
-    @SerialName("null_id") // Change "null_id" to "kitsu_id" once the repo owner fixes it
+    @SerialName("kitsu_id")
     val kitsuId: Int? = null,
 )
