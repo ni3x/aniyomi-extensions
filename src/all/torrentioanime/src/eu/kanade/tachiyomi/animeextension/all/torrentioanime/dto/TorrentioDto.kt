@@ -3,6 +3,16 @@ package eu.kanade.tachiyomi.animeextension.all.torrentioanime.dto
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+// Mapping Data
+@Serializable
+data class Mapping(
+    @SerialName("anilist_id")
+    val anilistId: Int? = null,
+
+    @SerialName("kitsu_id")
+    val kitsuId: Int? = null,
+)
+
 // Normal Anilst Meta Data
 @Serializable
 data class AnilistMeta(
@@ -154,14 +164,4 @@ data class EpisodeVideo(
     val episode: Int? = null,
     val released: String? = null,
     val title: String? = null,
-)
-
-// AniList to Kitsu Mapping Data
-@Serializable
-data class AnilistMapping(
-    @SerialName("anilist_id")
-    val anilistId: Int? = null,
-
-    @SerialName("kitsu_id")
-    val kitsuId: Int? = null,
 )
