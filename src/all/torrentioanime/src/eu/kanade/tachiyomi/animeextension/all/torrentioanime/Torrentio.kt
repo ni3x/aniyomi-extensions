@@ -10,11 +10,11 @@ import androidx.preference.ListPreference
 import androidx.preference.MultiSelectListPreference
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
-import eu.kanade.tachiyomi.animeextension.all.torrentioanime.dto.AnilistMapping
 import eu.kanade.tachiyomi.animeextension.all.torrentioanime.dto.AnilistMeta
 import eu.kanade.tachiyomi.animeextension.all.torrentioanime.dto.AnilistMetaLatest
 import eu.kanade.tachiyomi.animeextension.all.torrentioanime.dto.DetailsById
 import eu.kanade.tachiyomi.animeextension.all.torrentioanime.dto.EpisodeList
+import eu.kanade.tachiyomi.animeextension.all.torrentioanime.dto.Mapping
 import eu.kanade.tachiyomi.animeextension.all.torrentioanime.dto.StreamDataTorrent
 import eu.kanade.tachiyomi.animesource.ConfigurableAnimeSource
 import eu.kanade.tachiyomi.animesource.model.AnimeFilterList
@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.animesource.online.AnimeHttpSource
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.awaitSuccess
+import eu.kanade.tachiyomi.util.parseAs
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.add
@@ -60,6 +61,12 @@ class Torrentio : ConfigurableAnimeSource, AnimeHttpSource() {
 
     private val context = Injekt.get<Application>()
     private val handler by lazy { Handler(Looper.getMainLooper()) }
+
+    private val mappings by lazy {
+        client.newCall(
+            GET("https://raw.githubusercontent.com/Fribb/anime-lists/master/anime-offline-database-reduced.json", headers),
+        ).execute().parseAs<List<Mapping>>()
+    }
 
     // ============================== Anilist API Request ===================
     private fun makeGraphQLRequest(query: String, variables: String): Request {
@@ -300,24 +307,9 @@ class Torrentio : ConfigurableAnimeSource, AnimeHttpSource() {
     }
 
     // ============================== Episodes ==============================
-
-    private fun anilistMappingRequest(): Request {
-        return GET("https://raw.githubusercontent.com/Fribb/anime-lists/master/anime-offline-database-reduced.json")
-    }
-
-    private fun anilistMappingParse(): List<AnilistMapping> {
-        val response = client.newCall(anilistMappingRequest()).execute()
-        val responseString = response.body.string()
-        return json.decodeFromString(responseString)
-    }
-
-    private fun anilistToKitsuMapping(anilistId: String): String {
-        val anilistMapping = anilistMappingParse()
-        return anilistMapping.find { anilistId == it.anilistId.toString() }?.kitsuId.toString()
-    }
-
+    
     override fun episodeListRequest(anime: SAnime): Request {
-        val kitsuId = anilistToKitsuMapping(anime.url)
+        val kitsuId = mappings.firstOrNull { anime.url.toInt() == it.anilistId }?.kitsuId.toString()
         return GET("https://anime-kitsu.strem.fun/meta/series/kitsu%3A$kitsuId.json")
     }
 
