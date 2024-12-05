@@ -717,7 +717,7 @@ class Torrentio : ConfigurableAnimeSource, AnimeHttpSource() {
         )
         private val PREF_PROVIDERS_DEFAULT = PREF_DEFAULT_PROVIDERS_VALUE.toSet()
 
-        /// Qualities/Resolutions
+        // / Qualities/Resolutions
         private const val PREF_QUALITY_KEY = "quality_selection"
         private val PREF_QUALITY = arrayOf(
             "BluRay REMUX",
