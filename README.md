@@ -1,7 +1,7 @@
 # ![app icon](./.github/readme-images/app-icon.png)Aniyomi Extensions
 Aniyomi is a free and open source manga reader for Android 6.0 and above.
 
-This repository contains the available extension catalogues for the [Aniyomi](https://github.com/aniyomiorg/aniyomi) fork.
+This repository contains the available extension catalogues for the [Aniyomi](https://github.com/aniyomiorg/aniyomi) fork. Torrent support is only available in [Dantotsu](https://github.com/rebelonion/Dantotsu), [Kuukiyomi (discontinued)](https://github.com/LuftVerbot/kuukiyomi), and [Animetail2](https://github.com/Dark25/Animetail2).
 
 # Usage
 
@@ -9,21 +9,11 @@ Extension sources can be downloaded, installed, and uninstalled via the main Ani
 
 ## Downloads and Installation
 
-If you prefer to directly add repository, they are available via [`Install`](https://intradeus.github.io/http-protocol-redirector/?r=aniyomi://add-repo?https://raw.githubusercontent.com/ni3x/aniyomi-extensions/repo/index.min.json), [`URL`](https://raw.githubusercontent.com/ni3x/aniyomi-extensions/repo/index.min.json) or directly in this GitHub repository in the [`repo` branch](https://github.com/ni3x/aniyomi-extensions/tree/repo/apk).
+If you prefer to directly add repository, they are available clicking [`Install`](https://intradeus.github.io/http-protocol-redirector/?r=aniyomi://add-repo?https://raw.githubusercontent.com/ni3x/aniyomi-extensions/repo/index.min.json), directly from this GitHub repository in the [`repo branch`](https://github.com/ni3x/aniyomi-extensions/tree/repo/apk) or by manually copy pasting the below URL this into your anime repo.
 
-# Requests
-
-Source requests here are meant as up-for-grabs for any developer, thus it's impossible to provide a time estimation for any of them. Furthermore, some sites are impossible to do, usually because of various technical reasons.
-
-# Contributing
-
-Contributions are welcome!
-
-Check out the repo's [issue backlog](https://github.com/ni3x/aniyomi-extensions/issues) for source requests and bug reports.
-
-To get started with development, see [CONTRIBUTING.md](./CONTRIBUTING.md).
-
-It might also be good to read our [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md).
+```
+https://raw.githubusercontent.com/ni3x/aniyomi-extensions/repo/index.min.json
+```
 
 ## License
 
