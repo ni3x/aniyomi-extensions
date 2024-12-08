@@ -48,21 +48,21 @@ class HentaiTorrent : ConfigurableAnimeSource, ParsedAnimeHttpSource() {
 
     // ============================== Popular ===============================
     override fun popularAnimeRequest(page: Int): Request {
-        val adjustedPage = if (page == 1) 0 else page
-        return GET("$baseUrl/page/$adjustedPage")
+        return GET("$baseUrl/page/$page")
     }
 
-    override fun popularAnimeSelector(): String = "main.site-main article"
+    override fun popularAnimeSelector(): String = "div.image-container div.image-wrapper"
 
     override fun popularAnimeFromElement(element: Element): SAnime {
         val anime = SAnime.create()
-        anime.setUrlWithoutDomain(element.select("h3.article-title a").attr("href"))
-        anime.title = element.select("h3.article-title a").text().trim()
-        anime.thumbnail_url = element.select("div.data-bg-hover").attr("data-background")
+        anime.setUrlWithoutDomain(element.select("a.overlay").attr("href"))
+        anime.title = element.select("a.overlay").text().trim()
+        anime.thumbnail_url = element.select("img").attr("src")
+
         return anime
     }
 
-    override fun popularAnimeNextPageSelector(): String = "nav.pagination a.next"
+    override fun popularAnimeNextPageSelector(): String = "div.pagination a:contains(Next)"
 
     // =============================== Latest ===============================
     override fun latestUpdatesRequest(page: Int): Request {
@@ -105,9 +105,9 @@ class HentaiTorrent : ConfigurableAnimeSource, ParsedAnimeHttpSource() {
         }.toString()
 
         return if (query.isNotEmpty()) {
-            GET("$baseUrl/page/$page?s=$encodedQuery")
+            GET("$baseUrl/s.php?search=$encodedQuery&page=$page")
         } else {
-            GET("$baseUrl/$cat/page/$page")
+            GET("$baseUrl/catalog/$cat/page/$page")
         }
     }
 
@@ -120,45 +120,41 @@ class HentaiTorrent : ConfigurableAnimeSource, ParsedAnimeHttpSource() {
     // =========================== Anime Details ============================
     override fun animeDetailsParse(document: Document): SAnime {
         val anime = SAnime.create()
-        val data = document.select("div.entry-content p")
-        anime.description = data.text()
-        anime.thumbnail_url = data.select("img").attr("scr")
+        anime.description = document.select("div.article-content").html().replace(Regex("<(?!br\\s*/?)[^>]+>"), "").replace("<br>", "\n").replace("<br/>", "\n")
         return anime
     }
 
     // ============================== Episodes ==============================
-    override fun episodeListSelector() = "div.torrent-file-list ul li li"
+    override fun episodeListSelector() = "div.download-container div.download-button"
 
     override fun episodeListParse(response: Response): List<SEpisode> {
         val document = response.asJsoup()
-        val torrentFile = document.select("a.edl_post_dlinks").attr("href")
-        if (torrentFile.isEmpty()) {
-            throw Exception("No Torrent Found!")
-        }
-        try {
-            val torrent = TorrentUtils.getTorrentInfo(torrentFile, "torrent")
-            val torrentIndexed = torrent.files
-            val torrentMagnet = "magnet:?xt=urn:btih:${torrent.hash}&dn=${torrent.hash}"
-            val torrentTracker = torrent.trackers.filter { it.trim().isNotEmpty() }.joinToString("") { "&tr=$it" }
+        val downloadButtonUrl = document.select("div.download-container a.download-button").attr("href")
+        val downloadPage = client.newCall(GET("$baseUrl$downloadButtonUrl")).execute().asJsoup()
+        val torrentFileUrl = downloadPage.select("a.download-button").attr("href")
+
+        if (torrentFileUrl.isEmpty()) throw Exception("No Torrent Found!")
+
+        return try {
+            val torrent = TorrentUtils.getTorrentInfo(torrentFileUrl, "torrent")
+            val torrentMagnetLink = "magnet:?xt=urn:btih:${torrent.hash}&dn=${torrent.hash}"
+            var torrentTrackers = fetchTrackers().split("\n").filter { it.isNotBlank() }.joinToString("&tr=", "&tr=")
+            torrentTrackers += torrent.trackers.filter { it.isNotBlank() }.joinToString("&tr=", "&tr=")
             var episodeNumber = 1F
-            return torrentIndexed
+            torrent.files
                 .filter { it.path.substringAfterLast('.').lowercase(Locale.ROOT) in validVideoExtensions }
-                .map {
+                .map { file ->
                     SEpisode.create().apply {
                         name = if (preferences.getBoolean(IS_FILENAME_KEY, IS_FILENAME_DEFAULT)) {
-                            it.path.trim().split('/').last()
+                            file.path.split('/').last().trim()
                         } else {
-                            it.path.trim()
-                                .replace("[", "(")
-                                .replace(Regex("]"), ")")
-                                .replace("/", "\uD83D\uDCC2 ")
+                            file.path.trim().replace("[", "(").replace("]", ")").replace("/", "\uD83D\uDCC2 ")
                         }
-                        url = "$torrentMagnet$torrentTracker&index=${it.indexFile}"
+                        url = "$torrentMagnetLink$torrentTrackers&index=${file.indexFile}"
                         episode_number = episodeNumber++
-                        scanlator = convertBytesToReadable(it.size)
+                        scanlator = convertBytesToReadable(file.size)
                     }
                 }.reversed()
-                .toMutableList()
         } catch (e: SocketTimeoutException) {
             throw Exception("Dead Torrent \uD83D\uDE35")
         }
@@ -176,6 +172,17 @@ class HentaiTorrent : ConfigurableAnimeSource, ParsedAnimeHttpSource() {
             gigabytes >= 1 -> String.format("%.2f GB", gigabytes)
             megabytes >= 1 -> String.format("%.2f MB", megabytes)
             else -> String.format("%.2f KB", kilobytes)
+        }
+    }
+
+    private fun fetchTrackers(): String {
+        val request = Request.Builder()
+            .url("https://raw.githubusercontent.com/ngosang/trackerslist/refs/heads/master/trackers_all_http.txt")
+            .build()
+
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) throw Exception("Unexpected code $response")
+            return response.body.string().trim()
         }
     }
 
@@ -236,12 +243,12 @@ class HentaiTorrent : ConfigurableAnimeSource, ParsedAnimeHttpSource() {
     }.toTypedArray()
     private fun getCategory(): List<Category> {
         return listOf(
-            Category("All", "0"),
-            Category("Cartoons", "cartoons"),
-            Category("DVD & HD", "hentai-dvd-hd"),
-            Category("2D Hentai", "hentai-2d-video"),
-            Category("3D Hentai", "hentai-3d-video"),
-            Category("Main Subsection", "hentai-main-subsection"),
+            Category("Home", "0"),
+            Category("Cartoons", "Cartoons"),
+            Category("2D video Hentai", "2D%20video%20Hentai"),
+            Category("3D video Hentai", "3D%20video%20Hentai"),
+            Category("Hentai DVD HD", "Hentai%20DVD%20HD"),
+            Category("Main Subsection Hentai", "Main%20Subsection%20Hentai"),
         )
     }
 
