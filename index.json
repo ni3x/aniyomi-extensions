@@ -169,10 +169,10 @@
   {
     "name": "Aniyomi: Hstream",
     "pkg": "eu.kanade.tachiyomi.animeextension.en.hstream",
-    "apk": "aniyomi-en.hstream-v14.8.apk",
+    "apk": "aniyomi-en.hstream-v14.9.apk",
     "lang": "en",
-    "code": 8,
-    "version": "14.8",
+    "code": 9,
+    "version": "14.9",
     "nsfw": 1,
     "hasReadme": 0,
     "hasChangelog": 0,
