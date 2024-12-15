@@ -409,7 +409,7 @@ class Torrentio : ConfigurableAnimeSource, AnimeHttpSource() {
 
         return streamList.streams?.map { stream ->
             val urlOrHash =
-                if (debridProvider == "none" && stream.fileIdx != 0) {
+                if (debridProvider == "none") {
                     val trackerList = animeTrackers.split(",").map { it.trim() }.filter { it.isNotBlank() }.joinToString("&tr=")
                     "magnet:?xt=urn:btih:${stream.infoHash}&dn=${stream.infoHash}&tr=$trackerList&index=${stream.fileIdx}"
                 } else stream.url ?: ""
