@@ -92,7 +92,7 @@
     "apk": "aniyomi-all.torrentio-v14.2.apk",
     "lang": "all",
     "code": 2,
-    "version": "14.2",
+    "version": "14.3",
     "nsfw": 0,
     "hasReadme": 0,
     "hasChangelog": 0,
@@ -109,7 +109,7 @@
   {
     "name": "Aniyomi: Torrentio Anime (Torrent / Debrid)",
     "pkg": "eu.kanade.tachiyomi.animeextension.all.torrentioanime",
-    "apk": "aniyomi-all.torrentioanime-v14.8.apk",
+    "apk": "aniyomi-all.torrentioanime-v14.9.apk",
     "lang": "all",
     "code": 8,
     "version": "14.8",
