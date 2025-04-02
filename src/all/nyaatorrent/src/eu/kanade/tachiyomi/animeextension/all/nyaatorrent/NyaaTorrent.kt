@@ -44,22 +44,17 @@ class NyaaTorrent(extName: String, private val extURL: String, private val extId
         Injekt.get<Application>().getSharedPreferences("source_$id", 0x0000)
     }
 
-    override val supportsLatest = false
+    override val supportsLatest = true
 
     override fun headersBuilder(): Headers.Builder {
         return super.headersBuilder()
             .add("Referer", baseUrl)
     }
 
-    // ============================== Popular ===============================
-    override fun popularAnimeRequest(page: Int): Request {
-        val categoryParam = if (extId == 1) "1_0" else "1_1"
-        return GET("$baseUrl/?f=0&c=$categoryParam&q=&p=$page")
-    }
-
-    override fun popularAnimeSelector(): String = "table.torrent-list tbody tr"
-
-    override fun popularAnimeFromElement(element: Element): SAnime {
+    // ============================== Shared ===============================
+    private val animeSelector = "table.torrent-list tbody tr"
+    private val animeNextPageSelector = "ul.pagination a[rel='next']"
+    private fun animeFromElement(element: Element): SAnime {
         val anime = SAnime.create()
         anime.setUrlWithoutDomain(element.select("td:nth-child(2) a").attr("href"))
         anime.title = element.select("td:nth-child(2) a:not(.comments)").attr("title")
@@ -67,24 +62,25 @@ class NyaaTorrent(extName: String, private val extURL: String, private val extId
         return anime
     }
 
-    override fun popularAnimeNextPageSelector(): String = "ul.pagination a[rel='next']"
+    // ============================== Popular ===============================
+    override fun popularAnimeRequest(page: Int): Request {
+        val categoryParam = if (extId == 1) "1_0" else "1_1"
+        return GET("$baseUrl/?f=0&c=$categoryParam&p=$page&s=seeders&o=desc")
+    }
+
+    override fun popularAnimeSelector(): String = animeSelector
+    override fun popularAnimeFromElement(element: Element): SAnime = animeFromElement(element)
+    override fun popularAnimeNextPageSelector(): String = animeNextPageSelector
 
     // =============================== Latest ===============================
     override fun latestUpdatesRequest(page: Int): Request {
-        throw UnsupportedOperationException()
+        val categoryParam = if (extId == 1) "1_0" else "1_1"
+        return GET("$baseUrl/?f=0&c=$categoryParam&p=$page")
     }
 
-    override fun latestUpdatesSelector(): String {
-        throw UnsupportedOperationException()
-    }
-
-    override fun latestUpdatesFromElement(element: Element): SAnime {
-        throw UnsupportedOperationException()
-    }
-
-    override fun latestUpdatesNextPageSelector(): String? {
-        throw UnsupportedOperationException()
-    }
+    override fun latestUpdatesSelector(): String = animeSelector
+    override fun latestUpdatesFromElement(element: Element): SAnime = animeFromElement(element)
+    override fun latestUpdatesNextPageSelector(): String = animeNextPageSelector
 
     // =============================== Search ===============================
     override suspend fun getSearchAnime(page: Int, query: String, filters: AnimeFilterList): AnimesPage {
@@ -105,21 +101,27 @@ class NyaaTorrent(extName: String, private val extURL: String, private val extId
 
     override fun searchAnimeRequest(page: Int, query: String, filters: AnimeFilterList): Request {
         val encodedQuery = URLEncoder.encode(query, "UTF-8")
-        val categoryParam = if (extId == 1) "1_0" else "1_1"
-        val categoryBy = filters.firstNotNullOfOrNull { filter ->
+        var sortParam = "id"
+        var sortDirection = "desc"
+        var filterParam = "0"
+        var categoryParam = if (extId == 1) "1_0" else "1_1"
+        filters.forEach { filter ->
             when (filter) {
-                is CategoriesList -> getCategory()[filter.state].id
-                else -> categoryParam
+                is SortList -> {
+                    sortParam = availableSorts[filter.state?.index ?: 0].id
+                    sortDirection = if (filter.state?.ascending == true) "asc" else "desc"
+                }
+                is FilterList -> filterParam = availableFilters[filter.state].id
+                is CategoriesList -> categoryParam = availableCategories[filter.state].id
+                else -> {}
             }
         }
-        return GET("$baseUrl/?f=0&c=$categoryBy&q=$encodedQuery&p=$page")
+        return GET("$baseUrl/?f=$filterParam&c=$categoryParam&s=$sortParam&o=$sortDirection&q=$encodedQuery&p=$page")
     }
 
-    override fun searchAnimeSelector() = popularAnimeSelector()
-
-    override fun searchAnimeFromElement(element: Element) = popularAnimeFromElement(element)
-
-    override fun searchAnimeNextPageSelector() = popularAnimeNextPageSelector()
+    override fun searchAnimeSelector() = animeSelector
+    override fun searchAnimeFromElement(element: Element) = animeFromElement(element)
+    override fun searchAnimeNextPageSelector() = animeNextPageSelector
 
     // =========================== Anime Details ============================
     override fun animeDetailsParse(document: Document): SAnime {
@@ -249,31 +251,46 @@ class NyaaTorrent(extName: String, private val extURL: String, private val extId
         }.also(screen::addPreference)
     }
 
-    override fun getFilterList(): AnimeFilterList = AnimeFilterList(
-        CategoriesList(categoryName),
+    // ============================== Filters ==============================
+    private data class Sort(val name: String, val id: String)
+    private class SortList(availableSorts: Array<String>) : AnimeFilter.Sort("Sort", availableSorts, Selection(0, false))
+    private val availableSorts = arrayOf(
+        Sort("Date", "id"),
+        Sort("Seeders", "seeders"),
+        Sort("Leechers", "leechers"),
+        Sort("Downloads", "downloads"),
     )
 
-    private data class Category(val name: String, val id: String)
-    private class CategoriesList(category: Array<String>) : AnimeFilter.Select<String>("category", category)
-    private val categoryName = getCategory().map {
-        it.name
-    }.toTypedArray()
-    private fun getCategory(): List<Category> {
-        return if (extId == 1) {
-            listOf(
-                Category("All", "1_0"),
-                Category("Anime Music Video", "1_1"),
-                Category("English-translated", "1_2"),
-                Category("Non-English-translated", "1_3"),
-                Category("RAW", "1_4"),
-            )
-        } else {
-            listOf(
-                Category("Anime", "1_1"),
-                Category("Real Life", "2_2"),
-            )
-        }
+    private data class Filter(val name: String, val id: String) { override fun toString() = name }
+    private class FilterList(availableFilters: Array<String>) : AnimeFilter.Select<String>("Filter", availableFilters)
+    private val availableFilters = arrayOf(
+        Filter("No filter", "0"),
+        Filter("No remakes", "1"),
+        Filter("Trusted only", "2"),
+    )
+
+    private data class Category(val name: String, val id: String) { override fun toString() = name }
+    private class CategoriesList(availableCategories: Array<String>) : AnimeFilter.Select<String>("Category", availableCategories)
+    private val availableCategories = if (extId == 1) {
+        listOf(
+            Category("All", "1_0"),
+            Category("Anime Music Video", "1_1"),
+            Category("English-translated", "1_2"),
+            Category("Non-English-translated", "1_3"),
+            Category("Raw", "1_4"),
+        )
+    } else {
+        listOf(
+            Category("Anime", "1_1"),
+            Category("Real Life", "2_2"),
+        )
     }
+
+    override fun getFilterList(): AnimeFilterList = AnimeFilterList(
+        SortList(availableSorts.map { it.name }.toTypedArray()),
+        FilterList(availableFilters.map { it.name }.toTypedArray()),
+        CategoriesList(availableCategories.map { it.name }.toTypedArray()),
+    )
 
     companion object {
         const val PREFIX_SEARCH = "id:"
